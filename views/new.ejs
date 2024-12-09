@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Createone - Social Platform</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background-color: #000;
+            color: #fff;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 240px 1fr 300px;
+            min-height: 100vh;
+            margin: 0 184px;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            padding: 20px;
+            border-right: 1px solid #222;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+.post-profile{
+    display: contents;
+}
+        .profile {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .post-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.post-profile img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.post-profile div h4 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.post-profile div small {
+    color: #666;
+    font-size: 12px;
+}
+
+/* Post Content */
+.post-content {
+    margin: 10px 0;
+    line-height: 1.5;
+}
+
+/* Comments Section */
+.comment-section {
+    margin-top: 20px;
+    background-color: #222;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.comment-text {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 5px;
+    color: white;
+    resize: none;
+}
+
+.comments-container {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #444;
+}
+
+/* Individual Comment */
+.comment {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.comment img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+}
+
+.comment-content h5 {
+    margin: 0;
+    font-size: 14px;
+    color: #fff;
+}
+
+.comment-content p {
+    margin: 5px 0;
+    font-size: 13px;
+    color: #ddd;
+}
+
+.comment-content small {
+    color: #666;
+    font-size: 11px;
+}
+
+/* No Comments Message */
+.no-comments {
+    color: #666;
+    font-style: italic;
+    text-align: center;
+    margin-top: 10px;
+}
+.post-time{
+    position: absolute;
+    top: 45.5rem;
+    right: 33rem;
+    font-size: 8px;
+}
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 5px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background-color: #111;
+        }
+
+        .nav-item i {
+            margin-right: 10px;
+            width: 20px;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 20px;
+            max-width: 800px;
+        }
+
+        .compose-post {
+            background-color: #111;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            height: fit-content;
+            margin: 32px 20px;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .post-action {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #666;
+        }
+
+        .post {
+            background-color: #111;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            height: fit-content;
+            margin: 32px 20px;
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .post-header img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .post-images {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .post-images img {
+            width: 100%;
+            border-radius: 8px;
+        }
+
+        /* Right Sidebar */
+        .suggestions {
+            padding: 20px;
+            border-left: 1px solid #222;
+        }
+
+        .suggestion-card {
+            background-color: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .suggestion-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: #06553afa;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        /* Search Bar */
+        .search-bar {
+            background-color: #000;
+            border-radius: 20px;
+            padding: 10px 20px;
+            margin-bottom: 20px;
+        }
+
+        .search-bar input {
+            background: none;
+            border: none;
+            color: #fff;
+            width: 100%;
+            outline: none;
+        }
+
+        #content {
+            width: 100%;
+            padding: 10px;
+            background-color: #111;
+            border: 2px solid transparent;
+            color: white;
+            border-radius: 5px;
+            resize: none;
+            font-family: Arial, sans-serif;
+        }
+
+        #content:focus {
+            outline: none;
+            border-color: transparent;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Sidebar -->
+        <div class="sidebar">
+            <div class="logo"><img style="height: 46px;" src="./logo.png" alt="" srcset=""></div>
+            <div class="profile">
+                <img src="<%= user.profileImageUrl %>" alt="Profile">
+                <span><%= user.username %></span>
+            </div>
+            <nav>
+                <div class="nav-item"><i class="fas fa-home"></i> Home</div>
+                <div class="nav-item"><i class="fas fa-compass"></i> Explore</div>
+                <div class="nav-item"><i class="fas fa-cube"></i> NFT</div>
+                <div class="nav-item"><i class="fas fa-video"></i> Live</div>
+                <div class="nav-item"><i class="fas fa-bell"></i> Notifications <span class="badge">12</span></div>
+                <div class="nav-item"><i class="fas fa-envelope"></i> Messages <span class="badge">4</span></div>
+            </nav>
+            <div class="nav-item">
+                <i class="fas fa-user"></i> <a style="text-decoration: none;color: white;" href="auth/logout">Logout</a>
+            </div>
+        </div>
+<div class="posts">
+
+        <!-- Main Content -->
+        <div class="compose-post">
+            <form id="createPostForm" enctype="multipart/form-data">
+                <!-- Content Text Area -->
+                <div class="post-action">
+                    <textarea id="content" name="content" placeholder="What's on your mind?" rows="4"></textarea>
+                </div>
+        
+                <div class="post-actions">
+                    <div style="display: flex; gap: 40px;" class="post-actions-icon">
+                        <!-- Image Upload -->
+                        <div id="uploadArea" style="cursor: pointer; padding: 20px; border: 2px dashed #ccc; border-radius: 10px; text-align: center;">
+                            <p>Click or drag an image here to upload</p>
+                            <input type="file" id="imageInput" name="image" style="display:none">
+                        </div>
+        
+                        <!-- Other Actions -->
+                        <div class="post-action">
+                            <i class="fas fa-video"></i> Add Video
+                        </div>
+                        <div class="post-action">
+                            <i class="fas fa-broadcast-tower"></i> Start Live
+                        </div>
+                    </div>
+                    <!-- Create Button -->
+                    <button type="submit" class="btn btn-primary">Create NFT</button>
+                </div>
+            </form>
+        
+            <!-- Image Preview and Remove Button -->
+            <div id="imagePreviewContainer" style="margin-top: 20px;"></div>
+            <button id="removeImageButton" style="display: none; margin-top: 10px;" class="btn btn-secondary">Remove Image</button>
+        </div>
+        
+        <div id="posts-container"></div>
+</div>
+
+        <!-- Right Sidebar -->
+
+    </div>
+
+    <script>
+
+
+document.getElementById('createPostForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const content = document.getElementById('content').value;  // Get content from textarea
+            const is_anonymous = false; // Set based on user choice
+            const image = document.getElementById('imageInput').files[0];  // Image file from input
+
+            // Create FormData to send the data including file
+            const formData = new FormData();
+            formData.append('content', content);
+            formData.append('is_anonymous', is_anonymous);
+            if (image) formData.append('image', image);
+
+            try {
+                const response = await fetch('/posts/create', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    console.log('Post created:', result);
+                    // Optionally, update the UI with the new post
+                } else {
+                    console.error('Error creating post:', result.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+        // Constants
+        const currentUserId = '<%= user._id %>';
+        const baseUrl = '/posts'; // Base URL for the posts API
+    
+        document.addEventListener('DOMContentLoaded', () => {
+            // Fetch and render posts on page load
+            fetchPosts();
+    
+            // Attach image input and drag-drop listeners
+            setupImageUpload();
+        });
+    
+        // Fetch and display all posts
+        async function fetchPosts() {
+            try {
+                const response = await fetch(`${baseUrl}/all`, { method: 'GET' });
+                const posts = await response.json();
+    
+                const postsContainer = document.getElementById('posts-container');
+                postsContainer.innerHTML = ''; // Clear previous posts
+    
+                posts.forEach(renderPost);
+            } catch (error) {
+                console.error('Error fetching posts:', error);
+            }
+        }
+    
+        // Render a single post
+        function renderPost(post) {
+    const postsContainer = document.getElementById('posts-container');
+
+    const postElement = document.createElement('div');
+    postElement.classList.add('post');
+
+    const isCurrentUserOwner = post.user_id._id === currentUserId;
+    const timeAgo = new Date(post.created_at).toLocaleString();
+
+    postElement.innerHTML = `
+        <div class="post-header">
+            <div class="post-profile">
+                <img src="${post.user_id.profileImageUrl}" alt="Profile">
+                <div>
+                    <h4>${post.user_id.username}</h4>
+                    <small>${timeAgo}</small>
+                </div>
+            </div>
+        </div>
+        <p class="post-content">${post.content}</p>
+        <div class="post-images">
+            ${post.image_url ? `<img src="${post.image_url}" alt="Post Image">` : ''}
+        </div>
+        <div class="post-footer">
+            <button class="btn btn-primary upvote" data-id="${post._id}" ${post.upvotedBy.includes(currentUserId) ? 'disabled' : ''}>
+                Upvote (${post.upvotedBy.length})
+            </button>
+            <button class="btn btn-secondary downvote" data-id="${post._id}" ${post.downvotedBy.includes(currentUserId) ? 'disabled' : ''}>
+                Downvote (${post.downvotedBy.length})
+            </button>
+            ${isCurrentUserOwner ? `<button class="btn btn-danger delete" data-id="${post._id}">Delete</button>` : ''}
+        </div>
+        <div class="comment-section">
+            <textarea class="comment-text" placeholder="Add a comment"></textarea>
+            <button class="btn btn-primary add-comment" data-id="${post._id}">Add Comment</button>
+            <div class="comments-container">
+                ${renderComments(post.comments)}
+            </div>
+        </div>
+    `;
+
+    postsContainer.appendChild(postElement);
+
+    // Attach event listeners
+    postElement.querySelector('.upvote')?.addEventListener('click', handleUpvote);
+    postElement.querySelector('.downvote')?.addEventListener('click', handleDownvote);
+    postElement.querySelector('.delete')?.addEventListener('click', handleDelete);
+    postElement.querySelector('.add-comment')?.addEventListener('click', handleAddComment);
+}
+            const postsContainer = document.getElementById('posts-container');
+    
+            const postElement = document.createElement('div');
+            postElement.classList.add('post');
+    
+            const isCurrentUserOwner = post.user_id._id === currentUserId;
+            const timeAgo = new Date(post.created_at).toLocaleString();
+    
+            postElement.innerHTML = `
+                <div class="post-header">
+                    <div class="post-profile">
+                        <img src="${post.user_id.profileImageUrl}" alt="Profile">
+                        <h4>${post.user_id.username}</h4>
+                    </div>
+                    <small>${timeAgo}</small>
+                </div>
+                <p>${post.content}</p>
+                <div class="post-images">
+                    ${post.image_url ? `<img src="${post.image_url}" alt="Post Image">` : ''}
+                </div>
+                <div class="post-footer">
+                    <button class="btn btn-primary upvote" data-id="${post._id}" ${post.upvotedBy.includes(currentUserId) ? 'disabled' : ''}>
+                        Upvote (${post.upvotedBy.length})
+                    </button>
+                    <button class="btn btn-secondary downvote" data-id="${post._id}" ${post.downvotedBy.includes(currentUserId) ? 'disabled' : ''}>
+                        Downvote (${post.downvotedBy.length})
+                    </button>
+                    ${isCurrentUserOwner ? `<button class="btn btn-danger delete" data-id="${post._id}">Delete</button>` : ''}
+                </div>
+                <div class="comment-section">
+                    <textarea class="comment-text" placeholder="Add a comment"></textarea>
+                    <button class="btn btn-primary add-comment" data-id="${post._id}">Add Comment</button>
+                    ${renderComments(post.comments)}
+                </div>
+            `;
+    
+            postsContainer.appendChild(postElement);
+    
+            // Attach event listeners
+            postElement.querySelector('.upvote')?.addEventListener('click', handleUpvote);
+            postElement.querySelector('.downvote')?.addEventListener('click', handleDownvote);
+            postElement.querySelector('.delete')?.addEventListener('click', handleDelete);
+            postElement.querySelector('.add-comment')?.addEventListener('click', handleAddComment);
+        
+        // Render comments
+        function renderComments(comments = []) {
+    if (comments.length === 0) return '<p class="no-comments">No comments yet.</p>';
+    return comments.map(comment => `
+        <div class="comment">
+            <img src="${comment.user_id.profileImageUrl}" alt="Commenter">
+            <div class="comment-content">
+                <h5>${comment.user_id.username}</h5>
+                <p>${comment.content}</p>
+                <small>${new Date(comment.created_at).toLocaleString()}</small>
+            </div>
+        </div>
+    `).join('');
+}
+    
+        // Handle upvote
+        async function handleUpvote(event) {
+            const postId = event.target.dataset.id;
+            try {
+                const response = await fetch(`${baseUrl}/upvote/${postId}`, { method: 'POST' });
+                if (!response.ok) throw new Error('Failed to upvote');
+                fetchPosts(); // Refresh posts
+            } catch (error) {
+                console.error(error);
+            }
+        }
+    
+        // Handle downvote
+        async function handleDownvote(event) {
+            const postId = event.target.dataset.id;
+            try {
+                const response = await fetch(`${baseUrl}/downvote/${postId}`, { method: 'POST' });
+                if (!response.ok) throw new Error('Failed to downvote');
+                fetchPosts(); // Refresh posts
+            } catch (error) {
+                console.error(error);
+            }
+        }
+    
+        // Handle delete
+        async function handleDelete(event) {
+            const postId = event.target.dataset.id;
+            try {
+                const response = await fetch(`${baseUrl}/${postId}`, { method: 'DELETE' });
+                if (!response.ok) throw new Error('Failed to delete post');
+                fetchPosts(); // Refresh posts
+            } catch (error) {
+                console.error(error);
+            }
+        }
+    
+        // Handle add comment
+        async function handleAddComment(event) {
+            const postId = event.target.dataset.id;
+            const commentText = event.target.previousElementSibling.value.trim();
+    
+            if (!commentText) {
+                alert('Comment cannot be empty');
+                return;
+            }
+    
+            try {
+                const response = await fetch(`${baseUrl}/${postId}/comment`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: commentText }),
+                });
+                if (!response.ok) throw new Error('Failed to add comment');
+                fetchPosts(); // Refresh posts
+            } catch (error) {
+                console.error(error);
+            }
+        }
+    
+        // Image upload setup
+        function setupImageUpload() {
+            const uploadArea = document.getElementById('uploadArea');
+            const imageInput = document.getElementById('imageInput');
+            const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+            const removeImageButton = document.getElementById('removeImageButton');
+    
+            uploadArea.addEventListener('click', () => imageInput.click());
+            uploadArea.addEventListener('dragover', (e) => e.preventDefault());
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const file = e.dataTransfer.files[0];
+                if (file) previewImage(file);
+            });
+    
+            imageInput.addEventListener('change', (e) => previewImage(e.target.files[0]));
+    
+            function previewImage(file) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    imagePreviewContainer.innerHTML = `<img src="${reader.result}" style="max-width: 100%;">`;
+                    removeImageButton.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+    
+            removeImageButton.addEventListener('click', () => {
+                imagePreviewContainer.innerHTML = '';
+                imageInput.value = '';
+                removeImageButton.style.display = 'none';
+            });
+        }
+    </script>
+    
+</body>
+</html>
+<!-- //   <small class="post-time" >${timeString}</small> -->

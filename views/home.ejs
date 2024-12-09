@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Createone - Social Platform</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous"> -->
+  <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+  <div class="container">
+    <!-- Left Sidebar -->
+    <div class="sidebar">
+      <div class="logo">
+        <img style="height: 46px;" src="./logo.png" alt="Logo">
+      </div>
+      <div class="profile">
+        <img src="<%= user.profileImageUrl %>" alt="Profile">
+        <span><%= user.username %></span>
+      </div>
+      <nav>
+        <div class="nav-item"><i class="fas fa-home"></i> Home</div>
+        <div class="nav-item settings-dropdown">
+          <div class="dropdown-toggle">
+            <i class="fas fa-cog"></i> Settings
+          </div>
+          <ul class="dropdown-menu">
+            <li id="themeToggle">Switch to Light Mode</li>
+          </ul>
+        </div>
+    </nav>
+    <div class="nav-item logout">
+      <i class="fas fa-user "></i> <a style="text-decoration: none; color: var(--text-color);" href="auth/logout">Logout</a>
+    </div>
+    </div>
+    <div class="posts">
+
+      <!-- Main Content -->
+      <div class="compose-post">
+        <form id="createPostForm" enctype="multipart/form-data">
+          <!-- Content Text Area -->
+          <div class="post-action">
+            <textarea id="content" name="content" placeholder="What's on your mind?" rows="4"></textarea>
+          </div>
+
+          <!-- Add Is Anonymous Checkbox -->
+          <div class="post-action">
+            <label for="isAnonymous" class="isAnonymous">Post Anonymously</label>
+            <input type="checkbox" id="isAnonymous" name="is_anonymous" style="margin-left: 10px;">
+          </div>
+
+          <div class="post-actions">
+            <div style="display: flex; gap: 40px;" class="post-actions-icon">
+              <!-- Image Upload -->
+              <div id="uploadArea" style="cursor: pointer; padding: 20px; border: 2px dashed #ccc; border-radius: 10px; text-align: center;">
+                <p>Click or drag an image here to upload</p>
+                <input type="file" id="imageInput" name="image" style="display:none">
+              </div>
+
+              <!-- Other Actions -->
+              <div class="post-action">
+                <i class="fas fa-video"></i> Add Video
+              </div>
+              <div class="post-action">
+                <i class="fas fa-broadcast-tower"></i> Start Live
+              </div>
+            </div>
+            <!-- Create Button -->
+            <button type="submit" class="create-post-button btn btn-primary">Post</button>
+          </div>
+        </form>
+
+        <!-- Image Preview and Remove Button -->
+        <div id="imagePreviewContainer" style="margin-top: 20px;"></div>
+        <button id="removeImageButton" style="display: none; margin-top: 10px;" class="btn btn-secondary">Remove Image</button>
+      </div>
+
+      <div id="posts-container"></div>
+    </div>
+
+    <!-- Right Sidebar -->
+
+  </div>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script> -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script> -->
+  <script>
+    // theme toggle 
+
+
+    const themeToggle = document.getElementById('themeToggle');
+    const body = document.body;
+
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = body.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      body.setAttribute('data-theme', newTheme);
+
+      themeToggle.textContent = newTheme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+    });
+
+    // Dropdown toggle functionality
+    const dropdownToggle = document.querySelector('.dropdown-toggle');
+    const dropdownMenu = document.querySelector('.dropdown-menu');
+
+    dropdownToggle.addEventListener('click', () => {
+      dropdownMenu.classList.toggle('open');
+    });
+
+    // Close the dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!dropdownToggle.contains(e.target) && !dropdownMenu.contains(e.target)) {
+        dropdownMenu.classList.remove('open');
+      }
+    });
+
+    ///
+
+    document.getElementById('createPostForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const content = document.getElementById('content').value; // Get content from textarea
+      const isAnonymous = document.getElementById('isAnonymous').checked; // Check if the checkbox is checked
+      const image = document.getElementById('imageInput').files[0]; // Image file from input
+
+      // Create FormData to send the data including file
+      const formData = new FormData();
+      formData.append('content', content);
+      formData.append('is_anonymous', isAnonymous); // Add is_anonymous to the form data
+      if (image) formData.append('image', image);
+
+      try {
+        const response = await fetch('/posts/create', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          console.log('Post created:', result);
+          location.reload();
+          // Optionally, update the UI with the new post
+        } else {
+          console.error('Error creating post:', result.error);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    });
+    // Constants
+    const currentUserId = '<%= user._id %>';
+    const baseUrl = '/posts'; // Base URL for the posts API
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Fetch and render posts on page load
+      fetchPosts();
+
+      // Attach image input and drag-drop listeners
+      setupImageUpload();
+    });
+
+    // Fetch and display all posts
+    async function fetchPosts() {
+      try {
+        const response = await fetch(`${baseUrl}/all`, {
+          method: 'GET'
+        });
+        const posts = await response.json();
+
+        const postsContainer = document.getElementById('posts-container');
+        postsContainer.innerHTML = ''; // Clear previous posts
+
+        posts.forEach(renderPost);
+      } catch (error) {
+        console.error('Error fetching posts:', error);
+      }
+    }
+
+    // Render a single post
+    function renderPost(post) {
+      const postsContainer = document.getElementById('posts-container');
+      const postElement = document.createElement('div');
+      postElement.classList.add('post');
+
+      const isCurrentUserOwner = post.user_id._id === currentUserId;
+      const timeAgo = new Date(post.created_at).toLocaleString();
+      const contentLimit = 100; // Character limit for the post content
+      const isContentLong = post.content.length > contentLimit;
+      const truncatedContent = isContentLong ?
+        `${post.content.substring(0, contentLimit)}...` :
+        post.content;
+
+      postElement.innerHTML = `
+        <div class="post-header">
+            <div class="post-profile">
+                <img src="${post.user_id.profileImageUrl}" alt="Profile">
+                <div>
+                    <h4>${post.user_id.username}</h4>
+                    <small>${timeAgo}</small>
+                </div>
+            </div>
+        </div>
+        <p class="post-content">${truncatedContent}</p>
+        ${isContentLong ? '<button class="btn btn-link show-more">Show More</button>' : ''}
+        <div class="post-images">
+            ${post.image_url ? `<img src="${post.image_url}" alt="Post Image">` : ''}
+        </div>
+        <div class="post-footer">
+            <button class="btn btn-primary upvote" data-id="${post._id}" ${post.upvotedBy.includes(currentUserId) ? 'disabled' : ''}>
+                Upvote (${post.upvotedBy.length})
+            </button>
+            <button class="btn btn-secondary downvote" data-id="${post._id}" ${post.downvotedBy.includes(currentUserId) ? 'disabled' : ''}>
+                Downvote (${post.downvotedBy.length})
+            </button>
+            ${isCurrentUserOwner ? `<button class="btn btn-danger delete" data-id="${post._id}">Delete</button>` : ''}
+        </div>
+        <div class="comment-section">
+            <textarea class="comment-text" placeholder="Add a comment"></textarea>
+            <button class="btn btn-primary add-comment" data-id="${post._id}">Add Comment</button>
+            <div class="comments-container">
+                ${renderComments(post.comments)}
+            </div>
+        </div>
+    `;
+
+      postsContainer.appendChild(postElement);
+
+      // Attach event listeners
+      postElement.querySelector('.upvote')?.addEventListener('click', handleUpvote);
+      postElement.querySelector('.downvote')?.addEventListener('click', handleDownvote);
+      postElement.querySelector('.delete')?.addEventListener('click', handleDelete);
+      postElement.querySelector('.add-comment')?.addEventListener('click', handleAddComment);
+
+      const showMoreButton = postElement.querySelector('.show-more');
+      if (showMoreButton) {
+        showMoreButton.addEventListener('click', () => {
+          postElement.querySelector('.post-content').textContent = post.content;
+          showMoreButton.style.display = 'none';
+        });
+      }
+    }
+
+
+    // Render comments
+    function renderComments(comments = []) {
+      if (comments.length === 0) return '<p class="no-comments">No comments yet.</p>';
+      return comments.map(comment => `
+        <div class="comment">
+            <img src="${comment.user_id.profileImageUrl}" alt="Commenter">
+            <div class="comment-content">
+                <h5 class="comment-user">${comment.user_id.username}</h5>
+                <p>${comment.content}</p>
+                <small>${new Date(comment.created_at).toLocaleString()}</small>
+            </div>
+        </div>
+    `).join('');
+    }
+
+    // Handle upvote
+    async function handleUpvote(event) {
+      const postId = event.target.dataset.id;
+      try {
+        const response = await fetch(`${baseUrl}/upvote/${postId}`, {
+          method: 'POST'
+        });
+        if (!response.ok) throw new Error('Failed to upvote');
+        fetchPosts(); // Refresh posts
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    // Handle downvote
+    async function handleDownvote(event) {
+      const postId = event.target.dataset.id;
+      try {
+        const response = await fetch(`${baseUrl}/downvote/${postId}`, {
+          method: 'POST'
+        });
+        if (!response.ok) throw new Error('Failed to downvote');
+        fetchPosts(); // Refresh posts
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    // Handle delete
+    async function handleDelete(event) {
+      const postId = event.target.dataset.id;
+      try {
+        const response = await fetch(`${baseUrl}/${postId}`, {
+          method: 'DELETE'
+        });
+        if (!response.ok) throw new Error('Failed to delete post');
+        fetchPosts(); // Refresh posts
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    // Handle add comment
+    async function handleAddComment(event) {
+      const postId = event.target.dataset.id;
+      const commentText = event.target.previousElementSibling.value.trim();
+
+      if (!commentText) {
+        alert('Comment cannot be empty');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${baseUrl}/${postId}/comment`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            content: commentText
+          }),
+        });
+        if (!response.ok) throw new Error('Failed to add comment');
+        fetchPosts(); // Refresh posts
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    // Image upload setup
+    function setupImageUpload() {
+      const uploadArea = document.getElementById('uploadArea');
+      const imageInput = document.getElementById('imageInput');
+      const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+      const removeImageButton = document.getElementById('removeImageButton');
+
+      uploadArea.addEventListener('click', () => imageInput.click());
+      uploadArea.addEventListener('dragover', (e) => e.preventDefault());
+      uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const file = e.dataTransfer.files[0];
+        if (file) previewImage(file);
+      });
+
+      imageInput.addEventListener('change', (e) => previewImage(e.target.files[0]));
+
+      function previewImage(file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          imagePreviewContainer.innerHTML = `<img src="${reader.result}" style="max-width: 100%;">`;
+          removeImageButton.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+
+      removeImageButton.addEventListener('click', () => {
+        imagePreviewContainer.innerHTML = '';
+        imageInput.value = '';
+        removeImageButton.style.display = 'none';
+      });
+    }
+  </script>
+
+</body>
+
+</html>
+<!-- //   <small class="post-time" >${timeString}</small> -->
