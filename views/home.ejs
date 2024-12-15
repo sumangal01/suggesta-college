@@ -11,7 +11,7 @@
 
 </head>
 
-<body>
+<body data-theme="dark">
   <div class="container">
     <!-- Left Sidebar -->
     <div class="sidebar">
@@ -19,11 +19,13 @@
         <img style="height: 46px;" src="./logo.png" alt="Logo">
       </div>
       <div class="profile">
+        <a class="links" href="/profile"> 
         <img src="<%= user.profileImageUrl %>" alt="Profile">
         <span><%= user.username %></span>
+      </a>
       </div>
       <nav>
-        <div class="nav-item"><i class="fas fa-home"></i> Home</div>
+        <div class="nav-item"><a class="links" href="/dashboard"><i class="fas fa-home"></i> Home</a></div>
         <div class="nav-item settings-dropdown">
           <div class="dropdown-toggle">
             <i class="fas fa-cog"></i> Settings
@@ -46,13 +48,24 @@
           <div class="post-action">
             <textarea id="content" name="content" placeholder="What's on your mind?" rows="4"></textarea>
           </div>
-
+      
           <!-- Add Is Anonymous Checkbox -->
           <div class="post-action">
             <label for="isAnonymous" class="isAnonymous">Post Anonymously</label>
             <input type="checkbox" id="isAnonymous" name="is_anonymous" style="margin-left: 10px;">
+      
+          <!-- Add Category Dropdown -->
+          <div class="category-section">
+            
+            <select id="category" class="category-select" name="post_type" style="margin-left: 10px;">
+              <option value="Question">Question</option>
+              <option value="Feedback" selected>Feedback</option>
+              <option value="Announcement">Announcement</option>
+              <option value="Issue">Issue</option>
+            </select>
           </div>
-
+          </div>
+      
           <div class="post-actions">
             <div style="display: flex; gap: 40px;" class="post-actions-icon">
               <!-- Image Upload -->
@@ -60,39 +73,83 @@
                 <p>Click or drag an image here to upload</p>
                 <input type="file" id="imageInput" name="image" style="display:none">
               </div>
-
-              <!-- Other Actions -->
-              <div class="post-action">
-                <i class="fas fa-video"></i> Add Video
-              </div>
-              <div class="post-action">
-                <i class="fas fa-broadcast-tower"></i> Start Live
-              </div>
             </div>
             <!-- Create Button -->
             <button type="submit" class="create-post-button btn btn-primary">Post</button>
           </div>
         </form>
-
+      
         <!-- Image Preview and Remove Button -->
         <div id="imagePreviewContainer" style="margin-top: 20px;"></div>
         <button id="removeImageButton" style="display: none; margin-top: 10px;" class="btn btn-secondary">Remove Image</button>
       </div>
+      
 
       <div id="posts-container"></div>
     </div>
 
     <!-- Right Sidebar -->
-
+    <div class="suggestions">
+      <!-- Trending Section -->
+      <div class="suggestion-card">
+          <a href="/Trending" class="suggestion-link"> <!-- Link to Trending Posts -->
+              <div class="card-content">
+                  <h4>Trending 🔥</h4>
+                  <p>Stay up-to-date with the hottest discussions happening right now. Join the conversation!</p>
+              </div>
+          </a>
+      </div>
+  
+      <!-- Post Type Suggestions -->
+      <div class="suggestion-card">
+          <a href="/Question" class="suggestion-link"> <!-- Link to Question Posts -->
+              <div class="card-content">
+                  <h4>Question ❓</h4>
+                  <p>Have a question? Ask the community for answers and share your knowledge!</p>
+              </div>
+          </a>
+      </div>
+  
+      <div class="suggestion-card">
+          <a href="/Feedback" class="suggestion-link"> <!-- Link to Feedback Posts -->
+              <div class="card-content">
+                  <h4>Feedback 💬</h4>
+                  <p>Your opinion matters! Share feedback on topics that interest you and help improve the community.</p>
+              </div>
+          </a>
+      </div>
+  
+      <div class="suggestion-card">
+          <a href="/Announcement" class="suggestion-link"> <!-- Link to Announcement Posts -->
+              <div class="card-content">
+                  <h4>Announcement 📢</h4>
+                  <p>Stay informed about important updates and announcements. Don't miss out on the latest news!</p>
+              </div>
+          </a>
+      </div>
+  
+      <div class="suggestion-card">
+          <a href="/Issue" class="suggestion-link"> <!-- Link to Issue Posts -->
+              <div class="card-content">
+                  <h4>Issue ⚠️</h4>
+                  <p>Encountered an issue? Report it and get help from others to resolve it quickly.</p>
+              </div>
+          </a>
+      </div>
+  </div>
+  
   </div>
   <!-- <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script> -->
   <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script> -->
+  <script src="https://use.fontawesome.com/fe459689b4.js"></script>
+
   <script>
     // theme toggle 
 
 
     const themeToggle = document.getElementById('themeToggle');
     const body = document.body;
+    const logo = document.querySelector('img'); // Select the logo element
 
     themeToggle.addEventListener('click', () => {
       const currentTheme = body.getAttribute('data-theme');
@@ -100,6 +157,13 @@
       body.setAttribute('data-theme', newTheme);
 
       themeToggle.textContent = newTheme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+
+      // Change the logo based on the theme
+      logo.src = newTheme === 'dark' ? './logo.png' : './logo1.png';
+
+      // Dispatch a custom event to notify other components about the theme change
+      const themeChangeEvent = new Event('themeChange');
+      document.body.dispatchEvent(themeChangeEvent);
     });
 
     // Dropdown toggle functionality
@@ -116,40 +180,42 @@
         dropdownMenu.classList.remove('open');
       }
     });
-
     ///
 
-    document.getElementById('createPostForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
+    document.getElementById('createPostForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
 
-      const content = document.getElementById('content').value; // Get content from textarea
-      const isAnonymous = document.getElementById('isAnonymous').checked; // Check if the checkbox is checked
-      const image = document.getElementById('imageInput').files[0]; // Image file from input
+  const content = document.getElementById('content').value; // Get content from textarea
+  const isAnonymous = document.getElementById('isAnonymous').checked; // Check if the checkbox is checked
+  const category = document.getElementById('category').value; // Get selected category
+  const image = document.getElementById('imageInput').files[0]; // Image file from input
+console.log(category);
 
-      // Create FormData to send the data including file
-      const formData = new FormData();
-      formData.append('content', content);
-      formData.append('is_anonymous', isAnonymous); // Add is_anonymous to the form data
-      if (image) formData.append('image', image);
+  // Create FormData to send the data including file
+  const formData = new FormData();
+  formData.append('content', content);
+  formData.append('is_anonymous', isAnonymous); // Add is_anonymous to the form data
+  formData.append('post_type', category); // Add category to the form data
+  if (image) formData.append('image', image);
 
-      try {
-        const response = await fetch('/posts/create', {
-          method: 'POST',
-          body: formData,
-        });
-
-        const result = await response.json();
-        if (response.ok) {
-          console.log('Post created:', result);
-          location.reload();
-          // Optionally, update the UI with the new post
-        } else {
-          console.error('Error creating post:', result.error);
-        }
-      } catch (error) {
-        console.error('Error:', error);
-      }
+  try {
+    const response = await fetch('/posts/create', {
+      method: 'POST',
+      body: formData,
     });
+
+    const result = await response.json();
+    if (response.ok) {
+      console.log('Post created:', result);
+      location.reload();
+      // Optionally, update the UI with the new post
+    } else {
+      console.error('Error creating post:', result.error);
+    }
+  } catch (error) {
+    console.error('Error:', error);
+  }
+});
     // Constants
     const currentUserId = '<%= user._id %>';
     const baseUrl = '/posts'; // Base URL for the posts API
@@ -181,83 +247,128 @@
 
     // Render a single post
     function renderPost(post) {
-      const postsContainer = document.getElementById('posts-container');
-      const postElement = document.createElement('div');
-      postElement.classList.add('post');
+  const postsContainer = document.getElementById('posts-container');
+  const postElement = document.createElement('div');
+  postElement.classList.add('post');
 
-      const isCurrentUserOwner = post.user_id._id === currentUserId;
-      const timeAgo = new Date(post.created_at).toLocaleString();
-      const contentLimit = 100; // Character limit for the post content
-      const isContentLong = post.content.length > contentLimit;
-      const truncatedContent = isContentLong ?
-        `${post.content.substring(0, contentLimit)}...` :
-        post.content;
+  const timeAgo = new Date(post.created_at).toLocaleString();
+  const contentLimit = 100; // Character limit for the post content
+  const isContentLong = post.content.length > contentLimit;
+  const truncatedContent = isContentLong
+    ? `${post.content.substring(0, contentLimit)}...`
+    : post.content;
 
-      postElement.innerHTML = `
-        <div class="post-header">
-            <div class="post-profile">
-                <img src="${post.user_id.profileImageUrl}" alt="Profile">
-                <div>
-                    <h4>${post.user_id.username}</h4>
-                    <small>${timeAgo}</small>
-                </div>
+  postElement.innerHTML = `
+    <div class="post-header">
+        <div class="post-profile">
+            <img src="${post.user_id.profileImageUrl}" alt="Profile">
+            <div>
+                <h4>${
+                  post.user_id.username === "Anonymous"
+                    ? post.user_id.username
+                    : `<a class="links" href="/profile/${post.user_id._id}">${post.user_id.username}</a>`
+                }</h4>
+                <small>${timeAgo}</small>
             </div>
         </div>
-        <p class="post-content">${truncatedContent}</p>
-        ${isContentLong ? '<button class="btn btn-link show-more">Show More</button>' : ''}
-        <div class="post-images">
-            ${post.image_url ? `<img src="${post.image_url}" alt="Post Image">` : ''}
+        <div class="post-category">
+            <span class="badge badge-info badge-${post.post_type}"  >${post.post_type}</span>
         </div>
-        <div class="post-footer">
-            <button class="btn btn-primary upvote" data-id="${post._id}" ${post.upvotedBy.includes(currentUserId) ? 'disabled' : ''}>
-                Upvote (${post.upvotedBy.length})
-            </button>
-            <button class="btn btn-secondary downvote" data-id="${post._id}" ${post.downvotedBy.includes(currentUserId) ? 'disabled' : ''}>
-                Downvote (${post.downvotedBy.length})
-            </button>
-            ${isCurrentUserOwner ? `<button class="btn btn-danger delete" data-id="${post._id}">Delete</button>` : ''}
-        </div>
-        <div class="comment-section">
-            <textarea class="comment-text" placeholder="Add a comment"></textarea>
-            <button class="btn btn-primary add-comment" data-id="${post._id}">Add Comment</button>
-            <div class="comments-container">
-                ${renderComments(post.comments)}
-            </div>
-        </div>
-    `;
-
-      postsContainer.appendChild(postElement);
-
-      // Attach event listeners
-      postElement.querySelector('.upvote')?.addEventListener('click', handleUpvote);
-      postElement.querySelector('.downvote')?.addEventListener('click', handleDownvote);
-      postElement.querySelector('.delete')?.addEventListener('click', handleDelete);
-      postElement.querySelector('.add-comment')?.addEventListener('click', handleAddComment);
-
-      const showMoreButton = postElement.querySelector('.show-more');
-      if (showMoreButton) {
-        showMoreButton.addEventListener('click', () => {
-          postElement.querySelector('.post-content').textContent = post.content;
-          showMoreButton.style.display = 'none';
-        });
-      }
+    </div>
+    <p class="post-content">${truncatedContent}</p>
+    ${
+      isContentLong
+        ? '<button class="btn btn-link show-more">Show More</button>'
+        : ''
     }
+    <div class="post-images">
+        ${
+          post.image_url
+            ? `<img src="${post.image_url}" alt="Post Image">`
+            : ''
+        }
+    </div>
+    <div class="post-footer">
+       <button class="btn upvote upvote-btn" data-id="${post._id}" ${
+    post.upvotedBy.includes(currentUserId) ? 'disabled' : ''
+  }>
+          <i class="fa fa-thumbs-up fa-lg upvote ${
+            post.upvotedBy.includes(currentUserId) ? 'upvote-active' : ''
+          }" data-id="${post._id}" aria-hidden="true"></i>
+          ${post.upvotedBy.length}
+       </button>
+       <button class="btn downvote downvote-btn" data-id="${post._id}" ${
+    post.downvotedBy.includes(currentUserId) ? 'disabled' : ''
+  }>
+          <i class="fa fa-thumbs-down fa-lg downvote ${
+            post.downvotedBy.includes(currentUserId) ? 'downvote-active' : ''
+          }" data-id="${post._id}" aria-hidden="true"></i>
+          ${post.downvotedBy.length}
+       </button>
+       ${
+         post.isOwner
+           ? `<button class="btn btn-danger delete" data-id="${post._id}">Delete</button>`
+           : ''
+       }
+    </div>
+    <div class="comment-section">
+        <textarea class="comment-text" placeholder="Add a comment"></textarea>
+        <button class="btn btn-primary add-comment" data-id="${post._id}">Add Comment</button>
+        <div class="comments-container">
+            ${renderComments(post.comments)}
+        </div>
+    </div>
+  `;
+
+  
+
+  postsContainer.appendChild(postElement);
+
+  // Attach event listeners
+  const showMoreButton = postElement.querySelector('.show-more');
+  if (showMoreButton) {
+    showMoreButton.addEventListener('click', () => {
+      postElement.querySelector('.post-content').textContent = post.content;
+      showMoreButton.style.display = 'none';
+    });
+  }
+
+  postElement.querySelector('.delete')?.addEventListener('click', handleDelete);
+  postElement.querySelector('.upvote')?.addEventListener('click', handleUpvote);
+  postElement.querySelector('.downvote')?.addEventListener('click', handleDownvote);
+  postElement.querySelector('.add-comment')?.addEventListener('click', handleAddComment);
+}
+
+
+
 
 
     // Render comments
     function renderComments(comments = []) {
       if (comments.length === 0) return '<p class="no-comments">No comments yet.</p>';
+
       return comments.map(comment => `
-        <div class="comment">
+        <div class="comment" data-id="${comment._id}">
             <img src="${comment.user_id.profileImageUrl}" alt="Commenter">
             <div class="comment-content">
                 <h5 class="comment-user">${comment.user_id.username}</h5>
                 <p>${comment.content}</p>
                 <small>${new Date(comment.created_at).toLocaleString()}</small>
+                ${
+                    comment.isOwner 
+                    ? `<button class="btn btn-danger delete-comment" data-id="${comment._id}">Delete</button>` 
+                    : ''
+                }
             </div>
         </div>
     `).join('');
     }
+    document.addEventListener('click', event => {
+      if (event.target.matches('.delete-comment')) {
+        const commentId = event.target.dataset.id;
+        handleDeleteComment(commentId);
+      }
+    });
 
     // Handle upvote
     async function handleUpvote(event) {
@@ -325,6 +436,24 @@
         fetchPosts(); // Refresh posts
       } catch (error) {
         console.error(error);
+      }
+    }
+    // hnadle delete comment 
+    async function handleDeleteComment(commentId) {
+      try {
+        const response = await fetch(`${baseUrl}/comment/${commentId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        if (!response.ok) throw new Error('Failed to delete comment');
+
+        alert('Comment deleted successfully');
+        fetchPosts(); // Refresh the UI to reflect the changes
+      } catch (error) {
+        console.error('Error deleting comment:', error);
+        alert('Failed to delete comment');
       }
     }
 

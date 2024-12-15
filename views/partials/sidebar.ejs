@@ -1,0 +1,23 @@
+<div class="sidebar">
+    <div class="logo">
+      <img style="height: 46px;" src="./logo.png" alt="Logo">
+    </div>
+    <div class="profile">
+      <img src="<%= user.profileImageUrl %>" alt="Profile">
+      <span><%= user.username %></span>
+    </div>
+    <nav>
+      <div class="nav-item"><i class="fas fa-home"></i> Home</div>
+      <div class="nav-item settings-dropdown">
+        <div class="dropdown-toggle">
+          <i class="fas fa-cog"></i> Settings
+        </div>
+        <ul class="dropdown-menu">
+          <li id="themeToggle">Switch to Light Mode</li>
+        </ul>
+      </div>
+  </nav>
+  <div class="nav-item logout">
+    <i class="fas fa-user "></i> <a style="text-decoration: none; color: var(--text-color);" href="auth/logout">Logout</a>
+  </div>
+  </div>

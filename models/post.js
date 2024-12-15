@@ -37,6 +37,11 @@ const PostSchema = new mongoose.Schema({
     created_at: {
         type: Date,
         default: Date.now
+    },
+    post_type: {
+        type: String,
+        enum: ['Question', 'Feedback', 'Announcement', 'Issue'], // Options for post types
+        default: 'Feedback' // Default value if none is specified
     }
 });
 

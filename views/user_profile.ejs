@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile Page</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <link rel="stylesheet" href="http://localhost:8000/style.css">
+
+  <style>
+  
+    
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      /* padding: 20px; */
+      /* overflow-y: auto; */
+      /* margin-top: -48rem; */
+      margin-left: 18rem;
+      width: 600px;
+    }
+
+    /* Profile Card */
+    .profile-card {
+      background-color: var(--card-bg);
+      color: var(--text-color);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      max-width: 687.11px;
+      margin: auto;
+    }
+
+    .profile-header {
+      text-align: center;
+    }
+
+    .profile-image {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      margin-bottom: 10px;
+      border: 2px solid var(--text-color);
+      transition: all 0.3s ease-in-out;
+      /* Smooth transition for changes */
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      /* Subtle shadow for depth */
+    }
+
+    /* Hover Effect */
+    .profile-image:hover {
+      transform: scale(1.1);
+      /* Slightly enlarge the image on hover */
+      box-shadow: 0 0 20px rgba(255, 165, 0, 0.6);
+      /* Glowing effect */
+      border: 2px solid #ff6f61;
+      /* Bright border color on hover */
+    }
+
+    /* Animated Border Pulse */
+    .profile-image:active {
+      animation: pulse 1s infinite;
+      /* Pulse effect when clicked */
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 10px rgba(255, 165, 0, 0.6);
+      }
+
+      50% {
+        box-shadow: 0 0 20px rgba(255, 165, 0, 1);
+      }
+
+      100% {
+        box-shadow: 0 0 10px rgba(255, 165, 0, 0.6);
+      }
+    }
+
+    .profile-name {
+      font-size: 20px;
+      font-weight: bold;
+      margin: 5px 0;
+      color: #fff;
+      /* White color for better contrast on dark background */
+      transition: all 0.3s ease-in-out;
+      /* Smooth transition */
+      text-transform: uppercase;
+      /* Capitalize the text for a bold look */
+    }
+
+    /* Hover Effect */
+    .profile-name:hover {
+      color: #1e90ff;
+      /* Bright blue color on hover */
+      text-shadow: 2px 2px 10px rgba(30, 144, 255, 0.8);
+      /* Glowing blue effect */
+      transform: scale(1.05);
+      /* Slightly enlarge text on hover */
+    }
+
+    /* Animated Text Pulse */
+    .profile-name:active {
+      animation: pulseText 1s infinite;
+      /* Pulse effect when clicked */
+    }
+
+    @keyframes pulseText {
+      0% {
+        color: #1e90ff;
+        /* Bright blue */
+        text-shadow: 2px 2px 10px rgba(30, 144, 255, 0.8);
+      }
+
+      50% {
+        color: #00bfff;
+        /* Lighter blue */
+        text-shadow: 4px 4px 15px rgba(30, 144, 255, 1);
+      }
+
+      100% {
+        color: #1e90ff;
+        text-shadow: 2px 2px 10px rgba(30, 144, 255, 0.8);
+      }
+    }
+
+    .profile-username {
+      font-size: 14px;
+      color: #aaa;
+      margin-bottom: 5px;
+    }
+
+    .profile-badge {
+      font-size: 12px;
+      background-color: var(--sidebar-bg);
+      color: var(--text-color);
+      padding: 5px 10px;
+      border-radius: 12px;
+      display: inline-block;
+    }
+
+    .profile-bio {
+      margin: 15px 0;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .profile-stats {
+      display: flex;
+      justify-content: space-around;
+      margin: 15px 0;
+      font-size: 14px;
+    }
+
+    .profile-stats div {
+      text-align: center;
+    }
+
+    .latest-post {
+      margin-top: 20px;
+    }
+
+    .latest-post h4 {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .latest-post p {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #ccc;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <div class="sidebar">
+      <div class="logo">
+        <img style="height: 46px;" src="http://localhost:8000/logo.png" alt="Logo">
+      </div>
+      <div class="profile">
+        <a class="links" href="/profile">
+          <img src="<%= user.profileImageUrl %>" alt="Profile">
+          <span><%= user.username %></span>
+        </a>
+      </div>
+      <nav>
+        <div class="nav-item"><a class="links" href="/dashboard"><i class="fas fa-home"></i> Home</a></div>
+        <div class="nav-item settings-dropdown">
+          <div class="dropdown-toggle">
+            <i class="fas fa-cog"></i> Settings
+          </div>
+          <ul class="dropdown-menu">
+            <li id="themeToggle">Switch to Light Mode</li>
+          </ul>
+        </div>
+      </nav>
+      <div class="nav-item logout">
+        <i class="fas fa-user "></i> <a style="text-decoration: none; color: var(--text-color);" href="auth/logout">Logout</a>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="post">
+        <div class="profile-header">
+          <img class="profile-image" src="<%= otheruser.profileImageUrl %>" alt="Profile">
+          <h3 class="profile-name"><%= otheruser.username %></h3>
+        </div>
+        <div class="bio">
+          <p class="profile-bio">
+            <%= otheruser.bio || 'No bio available' %>
+          </p>
+        </div>
+      </div>
+
+      <div id="posts-container">
+        
+      </div>
+    </div>
+  </div>
+
+  <script>
+
+
+
+
+
+
+const themeToggle = document.getElementById('themeToggle');
+    const body = document.body;
+    const logo = document.querySelector('img'); // Select the logo element
+
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = body.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      body.setAttribute('data-theme', newTheme);
+
+      themeToggle.textContent = newTheme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+
+      // Change the logo based on the theme
+      logo.src = newTheme === 'dark' ? './logo.png' : './logo1.png';
+
+      // Dispatch a custom event to notify other components about the theme change
+      const themeChangeEvent = new Event('themeChange');
+      document.body.dispatchEvent(themeChangeEvent);
+    });
+
+    // Dropdown toggle functionality
+    const dropdownToggle = document.querySelector('.dropdown-toggle');
+    const dropdownMenu = document.querySelector('.dropdown-menu');
+
+    dropdownToggle.addEventListener('click', () => {
+      dropdownMenu.classList.toggle('open');
+    });
+
+    // Close the dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!dropdownToggle.contains(e.target) && !dropdownMenu.contains(e.target)) {
+        dropdownMenu.classList.remove('open');
+      }
+    });
+    ///
+
+
+
+
+
+
+    // console.log(otheruser.posts);
+    const currentUserId = '<%= user._id %>';
+    const otherUserId = '<%= otheruser._id %>';
+    const baseUrl = '/posts'; // Base URL for the posts API
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Fetch and render posts on page load
+      fetchPosts();
+
+      // Attach image input and drag-drop listeners
+      setupImageUpload();
+    });
+ async function fetchPosts() {
+    try {
+        // Ensure `baseUrl` and `otherUserId` are properly set
+        const response = await fetch(`${baseUrl}/otheruser/${otherUserId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`, // Assuming token is stored in localStorage
+            },
+        });
+
+        // Check if the response is successful (status code 200-299)
+        if (!response.ok) {
+            throw new Error(`Error: ${response.statusText}`);
+        }
+
+        // Parse the response JSON
+        const posts = await response.json();
+
+        // Check if posts data is valid
+        if (!Array.isArray(posts)) {
+            throw new Error('Invalid data format');
+        }
+
+        // Get the container to render posts
+        const postsContainer = document.getElementById('posts-container');
+        postsContainer.innerHTML = ''; // Clear any previous posts
+
+        // Render each post using the renderPost function
+        posts.forEach(renderPost);
+    } catch (error) {
+        // Log any errors and display an alert or message to the user
+        console.error('Error fetching posts:', error);
+        const postsContainer = document.getElementById('posts-container');
+        postsContainer.innerHTML = `<p class="error-message">Failed to load posts. Please try again later.</p>`;
+    }
+}
+
+function renderPost(post) {
+    const postsContainer = document.getElementById('posts-container');
+    const postElement = document.createElement('div');
+    postElement.classList.add('post');
+
+    const timeAgo = new Date(post.created_at).toLocaleString();
+    const contentLimit = 100; // Character limit for the post content
+    const isContentLong = post.content.length > contentLimit;
+    const truncatedContent = isContentLong ? 
+        `${post.content.substring(0, contentLimit)}...` : 
+        post.content;
+
+    postElement.innerHTML = `
+        <div class="post-header">
+            <div class="post-profile">
+                <img src="${post.user_id.profileImageUrl}" alt="Profile">
+                <div>
+                    <h4>${post.user_id.username}</h4>
+                    <small>${timeAgo}</small>
+                </div>
+            </div>
+             <div class="post-category">
+            <span class="badge badge-info badge-${post.post_type}"  >${post.post_type}</span>
+        </div>
+        </div>
+        <p class="post-content">${truncatedContent}</p>
+        ${isContentLong ? '<button class="btn btn-link show-more">Show More</button>' : ''}
+        <div class="post-images">
+            ${post.image_url ? `<img src="${post.image_url}" alt="Post Image">` : ''}
+        </div>
+        <div class="post-footer">
+            <button class="btn upvote upvote-btn" data-id="${post._id}" ${post.upvotedBy.includes(currentUserId) ? 'disabled' : ''}>
+                <i class="fa fa-thumbs-up fa-lg upvote ${post.upvotedBy.includes(currentUserId) ? 'upvote-active' : ''}" data-id="${post._id}" aria-hidden="true"></i>${post.upvotedBy.length}
+            </button>
+            <button class="btn downvote downvote-btn" data-id="${post._id}" ${post.downvotedBy.includes(currentUserId) ? 'disabled' : ''}>
+                <i class="fa fa-thumbs-down fa-lg downvote ${post.downvotedBy.includes(currentUserId) ? 'downvote-active' : ''}" data-id="${post._id}" aria-hidden="true"></i>${post.downvotedBy.length}
+            </button>
+            ${post.isOwner ? `<button class="btn btn-danger delete" data-id="${post._id}">Delete</button>` : ''}
+        </div>
+        <div class="comment-section">
+            <textarea class="comment-text" placeholder="Add a comment"></textarea>
+            <button class="btn btn-primary add-comment" data-id="${post._id}">Add Comment</button>
+            <div class="comments-container">
+                ${renderComments(post.comments)}
+            </div>
+        </div>
+    `;
+
+    postsContainer.appendChild(postElement);
+
+    // Handle the "Show More" button to expand content
+    const showMoreButton = postElement.querySelector('.show-more');
+    if (showMoreButton) {
+        showMoreButton.addEventListener('click', () => {
+            postElement.querySelector('.post-content').textContent = post.content;
+            showMoreButton.style.display = 'none';
+        });
+    }
+
+    // Event listener for deleting the post
+    postElement.querySelector('.delete')?.addEventListener('click', handleDelete);
+    postElement.querySelector('.upvote')?.addEventListener('click', handleUpvote);
+    postElement.querySelector('.downvote')?.addEventListener('click', handleDownvote);
+
+    // Event listener for adding comments
+    postElement.querySelector('.add-comment')?.addEventListener('click', handleAddComment);
+}
+
+
+    // Render comments
+    function renderComments(comments = []) {
+      if (comments.length === 0) return '<p class="no-comments">No comments yet.</p>';
+
+      return comments.map(comment => `
+        <div class="comment" data-id="${comment._id}">
+            <img src="${comment.user_id.profileImageUrl}" alt="Commenter">
+            <div class="comment-content">
+                <h5 class="comment-user">${comment.user_id.username}</h5>
+                <p>${comment.content}</p>
+                <small>${new Date(comment.created_at).toLocaleString()}</small>
+                ${
+                    comment.isOwner 
+                    ? `<button class="btn btn-danger delete-comment" data-id="${comment._id}">Delete</button>` 
+                    : ''
+                }
+            </div>
+        </div>
+    `).join('');
+    }
+    document.addEventListener('click', event => {
+      if (event.target.matches('.delete-comment')) {
+        const commentId = event.target.dataset.id;
+        handleDeleteComment(commentId);
+      }
+    });
+
+    // Handle upvote
+    async function handleUpvote(event) {
+      const postId = event.target.dataset.id;
+      try {
+        const response = await fetch(`${baseUrl}/upvote/${postId}`, {
+          method: 'POST'
+        });
+        if (!response.ok) throw new Error('Failed to upvote');
+        fetchPosts(); // Refresh posts
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    // Handle downvote
+    async function handleDownvote(event) {
+      const postId = event.target.dataset.id;
+      try {
+        const response = await fetch(`${baseUrl}/downvote/${postId}`, {
+          method: 'POST'
+        });
+        if (!response.ok) throw new Error('Failed to downvote');
+        fetchPosts(); // Refresh posts
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    // Handle delete
+    async function handleDelete(event) {
+      const postId = event.target.dataset.id;
+      try {
+        const response = await fetch(`${baseUrl}/${postId}`, {
+          method: 'DELETE'
+        });
+        if (!response.ok) throw new Error('Failed to delete post');
+        fetchPosts(); // Refresh posts
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    // Handle add comment
+    async function handleAddComment(event) {
+      const postId = event.target.dataset.id;
+      const commentText = event.target.previousElementSibling.value.trim();
+
+      if (!commentText) {
+        alert('Comment cannot be empty');
+        return;
+      }
+
+      try {
+        const response = await fetch(`${baseUrl}/${postId}/comment`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            content: commentText
+          }),
+        });
+        if (!response.ok) throw new Error('Failed to add comment');
+        fetchPosts(); // Refresh posts
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    // hnadle delete comment 
+    async function handleDeleteComment(commentId) {
+      try {
+        const response = await fetch(`${baseUrl}/comment/${commentId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        if (!response.ok) throw new Error('Failed to delete comment');
+
+        alert('Comment deleted successfully');
+        fetchPosts(); // Refresh the UI to reflect the changes
+      } catch (error) {
+        console.error('Error deleting comment:', error);
+        alert('Failed to delete comment');
+      }
+    }
+  </script>
+</body>
+
+</html>

@@ -1,12 +1,29 @@
 const express = require('express');
 const router = express.Router();
-const authMiddleware = require('../middleware/auth'); // Import auth middleware
+const {authMiddleware,
+  fetchUserData
+} = require('../middleware/auth'); // Import auth middleware
 
 // Route to render the signup page
 router.get('/signup', (req, res) => {
   res.render('signup');
 });
-
+router.get('/profile', authMiddleware, (req,res)=>{
+  return res.render('profile', { user: req.user });
+  } );
+  router.get("/profile/:_id", authMiddleware, fetchUserData, (req, res) => {
+    const otheruser = req.otherUser;
+  
+    // Render a profile page with user and post data
+    res.render('user_profile', { 
+      otheruser: req.otherUser.user,
+      posts: req.otherUser.posts,
+      user: req.user, // Still include logged-in user's data for context
+    });
+  });
+  
+  
+  // Delete a post
 // Route to render the login page
 router.get('/login', (req, res) => {
   res.render('login');
@@ -17,9 +34,51 @@ router.get('/', (req, res) => {
 // Route to render the dashboard page with user data
 router.get('/dashboard', authMiddleware, (req, res) => {
   // After middleware, `req.user` will contain the authenticated user's data
-  console.log(req.user);
+  // console.log(req.user);
   
   res.render('home', {
+    user: req.user, // Pass user data to the EJS template
+  });
+});
+router.get('/trending', authMiddleware, (req, res) => {
+  // After middleware, `req.user` will contain the authenticated user's data
+  // console.log(req.user);
+  
+  res.render('trending', {
+    user: req.user, // Pass user data to the EJS template
+  });
+});
+// ['Question', 'Feedback', 'Announcement', 'Issue']
+
+router.get('/Question',authMiddleware, (req, res) => {
+  // After middleware, `req.user` will contain the authenticated user's data
+  // console.log(req.user);
+  
+  res.render('post_type', {
+    user: req.user, // Pass user data to the EJS template
+  });
+});
+router.get('/Feedback',authMiddleware, (req, res) => {
+  // After middleware, `req.user` will contain the authenticated user's data
+  // console.log(req.user);
+  
+  res.render('post_type', {
+    user: req.user, // Pass user data to the EJS template
+  });
+});
+router.get('/Announcement',authMiddleware, (req, res) => {
+  // After middleware, `req.user` will contain the authenticated user's data
+  // console.log(req.user);
+  
+  res.render('post_type', {
+    user: req.user, // Pass user data to the EJS template
+  });
+});
+router.get('/Issue',authMiddleware, (req, res) => {
+  // After middleware, `req.user` will contain the authenticated user's data
+  // console.log(req.user);
+  
+  res.render('post_type', {
     user: req.user, // Pass user data to the EJS template
   });
 });

@@ -7,7 +7,8 @@ const bcrypt = require("bcrypt");
 const { body, validationResult } = require("express-validator");
 require('dotenv').config();
 const jwt = require("jsonwebtoken");
-
+const path = require("path");
+const fs = require('fs');
 
 // Setup email transporter
 
@@ -69,7 +70,7 @@ exports.handleUserSignup = [
       await user.save();
 
       // Send verification email
-      const verificationUrl = `http://localhost:8000/verify/${user.verificationToken}`;
+      const verificationUrl = `http://localhost:8000/auth/verify/${user.verificationToken}`;
       await transporter.sendMail({
         to: user.email,
         subject: "Verify Your Email",
@@ -160,11 +161,111 @@ exports.verifyEmail = async (req, res) => {
 
     // Success response
     console.log("User successfully verified!");
-    res.status(200).json({ message: "Email successfully verified! You can now log in." });
+   return res.render("verified")
+
   } catch (error) {
     console.error("Error during email verification:", error);
     res.status(500).json({ message: "Internal server error." });
   }
 };
+
+
+
+exports.handleUserEdit = [
+  // Validation middleware
+  body("username")
+    .optional()
+    .trim()
+    .isLength({ min: 4, max: 20 })
+    .withMessage("Username must be between 4 and 20 characters"),
+  body("oldPassword")
+    .optional()
+    .isLength({ min: 8 })
+    .withMessage("Old password must be at least 8 characters"),
+  body("newPassword")
+    .optional()
+    .isLength({ min: 8 })
+    .withMessage("New password must be at least 8 characters"),
+  body("bio")
+    .optional()
+    .trim()
+    .isLength({ max: 200 })
+    .withMessage("Bio must not exceed 200 characters"),
+
+  // Controller logic
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+      const userId = req.user.id; // Assuming user ID is stored in req.user after authentication
+      const { username, oldPassword, newPassword, bio } = req.body;
+
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Handle username update
+      if (username) {
+        user.username = username;
+      }
+
+      // Handle password update (compare old password with stored password)
+      if (newPassword) {
+        if (!oldPassword) {
+          return res.status(400).json({ message: "Old password is required to set a new password" });
+        }
+
+        const isOldPasswordValid = await user.comparePassword(oldPassword);
+        if (!isOldPasswordValid) {
+          return res.status(400).json({ message: "Old password is incorrect" });
+        }
+
+        // Do NOT hash the new password manually; it will be hashed automatically in the 'pre save' middleware
+        user.password = newPassword;
+      }
+
+      
+      if (req.file) {
+       
+        if (user.profileImageUrl && user.profileImageUrl !== "/uploads/default.png") {
+          const oldImagePath = path.join(__dirname, "../uploads", user.profileImageUrl);
+          fs.unlink(oldImagePath, (err) => {
+            if (err) {
+              console.error("Error deleting old profile image", err);
+            }
+          });
+        }
+
+        
+        user.profileImageUrl = `/uploads/${req.file.filename}`;
+      }
+
+      
+      if (bio) {
+        user.bio = bio;
+      }
+
+      // Save the updated user
+      await user.save();
+
+      // Respond with success message and updated user data
+      res.status(200).json({
+        message: "User updated successfully",
+        user: {
+          username: user.username,
+          email: user.email,
+          profileImageUrl: user.profileImageUrl,
+          bio: user.bio,
+        },
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Error updating user", error: error.message });
+    }
+  },
+];
 
 
