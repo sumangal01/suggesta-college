@@ -53,10 +53,11 @@
           <div class="post-action">
             <label for="isAnonymous" class="isAnonymous">Post Anonymously</label>
             <input type="checkbox" id="isAnonymous" name="is_anonymous" style="margin-left: 10px;">
+          </div>
       
           <!-- Add Category Dropdown -->
           <div class="category-section">
-            
+            <label for="category">Category</label>
             <select id="category" class="category-select" name="post_type" style="margin-left: 10px;">
               <option value="Question">Question</option>
               <option value="Feedback" selected>Feedback</option>
@@ -64,17 +65,16 @@
               <option value="Issue">Issue</option>
             </select>
           </div>
-          </div>
       
+          <!-- Image Upload -->
           <div class="post-actions">
             <div style="display: flex; gap: 40px;" class="post-actions-icon">
-              <!-- Image Upload -->
               <div id="uploadArea" style="cursor: pointer; padding: 20px; border: 2px dashed #ccc; border-radius: 10px; text-align: center;">
                 <p>Click or drag an image here to upload</p>
                 <input type="file" id="imageInput" name="image" style="display:none">
               </div>
             </div>
-            <!-- Create Button -->
+            <!-- Submit Button -->
             <button type="submit" class="create-post-button btn btn-primary">Post</button>
           </div>
         </form>
@@ -83,6 +83,7 @@
         <div id="imagePreviewContainer" style="margin-top: 20px;"></div>
         <button id="removeImageButton" style="display: none; margin-top: 10px;" class="btn btn-secondary">Remove Image</button>
       </div>
+      
       
 
       <div id="posts-container"></div>
@@ -145,7 +146,7 @@
 
   <script>
     // theme toggle 
-
+    const currentUserId = '<%= user._id %>';
 
     const themeToggle = document.getElementById('themeToggle');
     const body = document.body;
@@ -182,42 +183,80 @@
     });
     ///
 
-    document.getElementById('createPostForm').addEventListener('submit', async function (e) {
-  e.preventDefault();
+    document.addEventListener('DOMContentLoaded', () => {
+      // formData.append('_id', currentUserId);
+  const createPostForm = document.getElementById('createPostForm');
+  const imageInput = document.getElementById('imageInput');
+  const uploadArea = document.getElementById('uploadArea');
+  const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+  const removeImageButton = document.getElementById('removeImageButton');
 
-  const content = document.getElementById('content').value; // Get content from textarea
-  const isAnonymous = document.getElementById('isAnonymous').checked; // Check if the checkbox is checked
-  const category = document.getElementById('category').value; // Get selected category
-  const image = document.getElementById('imageInput').files[0]; // Image file from input
-console.log(category);
+  let selectedImage = null; // To keep track of uploaded image
 
-  // Create FormData to send the data including file
-  const formData = new FormData();
-  formData.append('content', content);
-  formData.append('is_anonymous', isAnonymous); // Add is_anonymous to the form data
-  formData.append('post_type', category); // Add category to the form data
-  if (image) formData.append('image', image);
+  // Trigger file input when upload area is clicked
+  uploadArea.addEventListener('click', () => imageInput.click());
 
-  try {
-    const response = await fetch('/posts/create', {
-      method: 'POST',
-      body: formData,
-    });
-
-    const result = await response.json();
-    if (response.ok) {
-      console.log('Post created:', result);
-      location.reload();
-      // Optionally, update the UI with the new post
-    } else {
-      console.error('Error creating post:', result.error);
+  // Handle image preview when file is selected
+  imageInput.addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      selectedImage = file;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        imagePreviewContainer.innerHTML = `<img src="${e.target.result}" alt="Preview" style="max-width: 100%; height: auto; border: 1px solid #ccc;">`;
+        removeImageButton.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
     }
-  } catch (error) {
-    console.error('Error:', error);
-  }
+  });
+
+  // Remove selected image
+  removeImageButton.addEventListener('click', () => {
+    imageInput.value = '';
+    selectedImage = null;
+    imagePreviewContainer.innerHTML = '';
+    removeImageButton.style.display = 'none';
+  });
+
+  // Handle form submission
+  createPostForm.addEventListener('submit', async (e) => {
+    e.preventDefault(); // Prevent default form submission
+
+    // Get form values
+    const content = document.getElementById('content').value;
+    const isAnonymous = document.getElementById('isAnonymous').checked;
+    const category = document.getElementById('category').value;
+    
+    // Create FormData object
+    const formData = new FormData();
+    formData.append('_id', currentUserId);
+    formData.append('content', content);
+    formData.append('is_anonymous', isAnonymous);
+    formData.append('post_type', category);
+    if (selectedImage) formData.append('image', selectedImage);
+
+    try {
+      // Send POST request to server
+      const response = await fetch('/posts/create', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        console.log('Post created:', result);
+        location.reload(); // Reload page on success
+      } else {
+        console.error('Error creating post:', result.error);
+        alert('Error: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Something went wrong!');
+    }
+  });
 });
     // Constants
-    const currentUserId = '<%= user._id %>';
     const baseUrl = '/posts'; // Base URL for the posts API
 
     document.addEventListener('DOMContentLoaded', () => {

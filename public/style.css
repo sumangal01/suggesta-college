@@ -459,7 +459,9 @@ button:disabled {
   display: grid
 ;
   height: fit-content;
-  gap: 20px;
+  gap: 20px;  
+    position: fixed;
+  right: 10px;
 }
 
 .suggestion-card {

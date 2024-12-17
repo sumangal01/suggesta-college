@@ -5,6 +5,7 @@ const path = require('path');
 const User = require('../models/user')
 // Create a new post
 exports.createPost = async (req, res) => {
+    const userId = req.user._id;
     try {
         const { content, is_anonymous, post_type } = req.body; // Extract post_type from the request body
         const post = new Post({
@@ -30,7 +31,7 @@ exports.getPosts = async (req, res) => {
     try {
         const userId = req.user._id; // Assume user ID is available in req.user from authentication middleware
         const posts = await Post.find()
-            .populate('user_id', 'username profileImageUrl')
+            .populate('user_id', 'username profileImageUrl') // Populate user details
             .populate({
                 path: 'comments',
                 populate: {
@@ -42,15 +43,29 @@ exports.getPosts = async (req, res) => {
 
         // Modify posts for anonymous users
         const postsWithOwnership = posts.map(post => {
-            const isOwner = post.user_id._id.toString() === userId.toString();
+            // Ensure user_id is not null before accessing _id
+            const isOwner = post.user_id && post.user_id._id.toString() === userId.toString();
+
+            // Process comments and check for ownership
             const commentsWithOwnership = post.comments.map(comment => {
-                const commentOwner = comment.user_id._id.toString() === userId.toString();
-                return { ...comment._doc, isOwner: commentOwner };
+                const commentOwner =
+                    comment.user_id && comment.user_id._id.toString() === userId.toString();
+                return {
+                    ...comment._doc,
+                    isOwner: commentOwner
+                };
             });
+
+            // Handle anonymous posts
             if (post.is_anonymous) {
                 post.user_id = { username: 'Anonymous', profileImageUrl: 'uploads/is_anonymous.png' };
             }
-            return { ...post._doc, isOwner, comments: commentsWithOwnership };
+
+            return {
+                ...post._doc,
+                isOwner,
+                comments: commentsWithOwnership
+            };
         });
 
         res.status(200).json(postsWithOwnership);
@@ -302,32 +317,41 @@ exports.getOtherUserPosts = async (req, res) => {
 };
 exports.showMostUpvotedPosts = async (req, res) => {
     try {
-        const userId = req.user._id;
+      const userId = req.user._id;
       const posts = await Post.find()
         .sort({ upvotes: -1 }) // Sort by upvotes in descending order
         .populate('user_id', 'username profileImageUrl')
-            .populate({
-                path: 'comments',
-                populate: {
-                    path: 'user_id',
-                    select: 'username profileImageUrl'
-                }
-            })
+        .populate({
+          path: 'comments',
+          populate: {
+            path: 'user_id',
+            select: 'username profileImageUrl',
+          },
+        })
         .exec();
-        const postsWithOwnership = posts.map(post => {
-            const isOwner = post.user_id._id.toString() === userId.toString();
-            const commentsWithOwnership = post.comments.map(comment => {
-                const commentOwner = comment.user_id._id.toString() === userId.toString();
-                return { ...comment._doc, isOwner: commentOwner };
-            });
-            if (post.is_anonymous) {
-                post.user_id = { username: 'Anonymous', profileImageUrl: 'uploads/is_anonymous.png' };
-            }
-            return { ...post._doc, isOwner, comments: commentsWithOwnership };
-        });
-  console.log(postsWithOwnership);
   
-      res.status(200).json( postsWithOwnership );
+      // Filter and process posts safely
+      const postsWithOwnership = posts
+        .filter(post => post.user_id) // Skip posts without a valid user_id
+        .map(post => {
+          const isOwner = post.user_id._id.toString() === userId.toString();
+  
+          // Handle comments safely
+          const commentsWithOwnership = post.comments
+            .filter(comment => comment.user_id) // Skip comments without a valid user_id
+            .map(comment => {
+              const commentOwner = comment.user_id._id.toString() === userId.toString();
+              return { ...comment._doc, isOwner: commentOwner };
+            });
+  
+          if (post.is_anonymous) {
+            post.user_id = { username: 'Anonymous', profileImageUrl: 'uploads/is_anonymous.png' };
+          }
+  
+          return { ...post._doc, isOwner, comments: commentsWithOwnership };
+        });
+  
+      res.status(200).json(postsWithOwnership);
     } catch (err) {
       res.status(500).json({ message: 'Error fetching posts', error: err });
     }
@@ -345,7 +369,7 @@ exports.showMostUpvotedPosts = async (req, res) => {
         const userId = req.user._id; // Assume user ID is available in req.user from authentication middleware
         const postType = req.params.post_type; // Get the post type from the URL parameter
 
-        // Validate post type (optional)
+        // Validate post type
         const validPostTypes = ['Question', 'Feedback', 'Announcement', 'Issue'];
         if (!validPostTypes.includes(postType)) {
             return res.status(400).json({ message: 'Invalid post type' });
@@ -363,22 +387,35 @@ exports.showMostUpvotedPosts = async (req, res) => {
             })
             .sort({ created_at: -1 });
 
-        // Modify posts for anonymous users
-        const postsWithOwnership = posts.map(post => {
-            const isOwner = post.user_id._id.toString() === userId.toString();
-            const commentsWithOwnership = post.comments.map(comment => {
-                const commentOwner = comment.user_id._id.toString() === userId.toString();
-                return { ...comment._doc, isOwner: commentOwner };
+        // Filter out invalid posts and comments with missing user_id
+        const postsWithOwnership = posts
+            .filter(post => post.user_id) // Remove posts with null user_id
+            .map(post => {
+                const isOwner = post.user_id && post.user_id._id.toString() === userId.toString();
+
+                // Process comments and filter null user_id
+                const commentsWithOwnership = post.comments
+                    .filter(comment => comment.user_id) // Remove comments with null user_id
+                    .map(comment => {
+                        const commentOwner =
+                            comment.user_id && comment.user_id._id.toString() === userId.toString();
+                        return { ...comment._doc, isOwner: commentOwner };
+                    });
+
+                // Handle anonymous posts
+                const userData = post.is_anonymous
+                    ? { username: 'Anonymous', profileImageUrl: 'uploads/is_anonymous.png' }
+                    : post.user_id;
+
+                return {
+                    ...post._doc,
+                    user_id: userData,
+                    isOwner,
+                    comments: commentsWithOwnership
+                };
             });
 
-            // Handle anonymous posts
-            if (post.is_anonymous) {
-                post.user_id = { username: 'Anonymous', profileImageUrl: 'uploads/is_anonymous.png' };
-            }
-
-            return { ...post._doc, isOwner, comments: commentsWithOwnership };
-        });
-console.log(postsWithOwnership);
+        console.log(postsWithOwnership);
 
         res.status(200).json(postsWithOwnership);
     } catch (error) {
@@ -386,3 +423,4 @@ console.log(postsWithOwnership);
         res.status(500).json({ error: 'Error fetching posts' });
     }
 };
+

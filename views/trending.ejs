@@ -153,132 +153,128 @@
       setupImageUpload();
     });
     async function fetchPosts() {
-      try {
-        // Ensure `baseUrl` and `otherUserId` are properly set
-        const response = await fetch(`${baseUrl}/most-upvoted`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`, // Assuming token is stored in localStorage
-          },
-        });
+  try {
+    const response = await fetch(`${baseUrl}/most-upvoted`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`, // Assuming token is stored
+      },
+    });
 
-        // Check if the response is successful (status code 200-299)
-        if (!response.ok) {
-          throw new Error(`Error: ${response.statusText}`);
-        }
-
-        // Parse the response JSON
-        const posts = await response.json();
-
-        // Check if posts data is valid
-        if (!Array.isArray(posts)) {
-          throw new Error('Invalid data format');
-        }
-
-        // Get the container to render posts
-        const postsContainer = document.getElementById('posts-container');
-        postsContainer.innerHTML = ''; // Clear any previous posts
-
-        // Render each post using the renderPost function
-        posts.forEach(renderPost);
-      } catch (error) {
-        // Log any errors and display an alert or message to the user
-        console.error('Error fetching posts:', error);
-        const postsContainer = document.getElementById('posts-container');
-        postsContainer.innerHTML = `<p class="error-message">Failed to load posts. Please try again later.</p>`;
-      }
+    if (!response.ok) {
+      throw new Error(`Error: ${response.statusText}`);
     }
 
-    function renderPost(post) {
-      const postsContainer = document.getElementById('posts-container');
-      const postElement = document.createElement('div');
-      postElement.classList.add('post');
-
-      const timeAgo = new Date(post.created_at).toLocaleString();
-      const contentLimit = 100; // Character limit for the post content
-      const isContentLong = post.content.length > contentLimit;
-      const truncatedContent = isContentLong ?
-        `${post.content.substring(0, contentLimit)}...` :
-        post.content;
-
-      postElement.innerHTML = `
-        <div class="post-header">
-            <div class="post-profile">
-                <img src="${post.user_id.profileImageUrl}" alt="Profile">
-                <div>
-                    <h4>${post.user_id.username}</h4>
-                    <small>${timeAgo}</small>
-                </div>
-            </div>
-             <div class="post-category">
-            <span class="badge badge-info badge-${post.post_type}"  >${post.post_type}</span>
-        </div>
-        </div>
-        <p class="post-content">${truncatedContent}</p>
-        ${isContentLong ? '<button class="btn btn-link show-more">Show More</button>' : ''}
-        <div class="post-images">
-            ${post.image_url ? `<img src="${post.image_url}" alt="Post Image">` : ''}
-        </div>
-        <div class="post-footer">
-            <button class="btn upvote upvote-btn" data-id="${post._id}" ${post.upvotedBy.includes(currentUserId) ? 'disabled' : ''}>
-                <i class="fa fa-thumbs-up fa-lg upvote ${post.upvotedBy.includes(currentUserId) ? 'upvote-active' : ''}" data-id="${post._id}" aria-hidden="true"></i>${post.upvotedBy.length}
-            </button>
-            <button class="btn downvote downvote-btn" data-id="${post._id}" ${post.downvotedBy.includes(currentUserId) ? 'disabled' : ''}>
-                <i class="fa fa-thumbs-down fa-lg downvote ${post.downvotedBy.includes(currentUserId) ? 'downvote-active' : ''}" data-id="${post._id}" aria-hidden="true"></i>${post.downvotedBy.length}
-            </button>
-            ${post.isOwner ? `<button class="btn btn-danger delete" data-id="${post._id}">Delete</button>` : ''}
-        </div>
-        <div class="comment-section">
-            <textarea class="comment-text" placeholder="Add a comment"></textarea>
-            <button class="btn btn-primary add-comment" data-id="${post._id}">Add Comment</button>
-            <div class="comments-container">
-                ${renderComments(post.comments)}
-            </div>
-        </div>
-    `;
-
-      postsContainer.appendChild(postElement);
-
-      // Handle the "Show More" button to expand content
-      const showMoreButton = postElement.querySelector('.show-more');
-      if (showMoreButton) {
-        showMoreButton.addEventListener('click', () => {
-          postElement.querySelector('.post-content').textContent = post.content;
-          showMoreButton.style.display = 'none';
-        });
-      }
-
-      // Event listener for deleting the post
-      postElement.querySelector('.delete')?.addEventListener('click', handleDelete);
-      postElement.querySelector('.upvote')?.addEventListener('click', handleUpvote);
-      postElement.querySelector('.downvote')?.addEventListener('click', handleDownvote);
-
-      // Event listener for adding comments
-      postElement.querySelector('.add-comment')?.addEventListener('click', handleAddComment);
+    const posts = await response.json();
+    if (!Array.isArray(posts)) {
+      throw new Error('Invalid data format');
     }
+
+    const postsContainer = document.getElementById('posts-container');
+    postsContainer.innerHTML = ''; // Clear old posts
+    posts.forEach(renderPost);
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+    document.getElementById('posts-container').innerHTML =
+      '<p class="error-message">Failed to load posts. Please try again later.</p>';
+  }
+}
+
+
+function renderPost(post) {
+  const postsContainer = document.getElementById('posts-container');
+  const postElement = document.createElement('div');
+  postElement.classList.add('post');
+
+  // Safely handle user_id (author of the post)
+  const user = post.user_id || { username: 'Deleted User', profileImageUrl: 'default-profile.png' };
+
+  const timeAgo = new Date(post.created_at).toLocaleString();
+  const contentLimit = 100;
+  const isContentLong = post.content.length > contentLimit;
+  const truncatedContent = isContentLong
+    ? `${post.content.substring(0, contentLimit)}...`
+    : post.content;
+
+  postElement.innerHTML = `
+    <div class="post-header">
+        <div class="post-profile">
+            <img src="${user.profileImageUrl}" alt="Profile">
+            <div>
+                <h4>${user.username}</h4>
+                <small>${timeAgo}</small>
+            </div>
+        </div>
+        <div class="post-category">
+            <span class="badge badge-info badge-${post.post_type}">${post.post_type}</span>
+        </div>
+    </div>
+    <p class="post-content">${truncatedContent}</p>
+    ${isContentLong ? '<button class="btn btn-link show-more">Show More</button>' : ''}
+    <div class="post-images">
+        ${post.image_url ? `<img src="${post.image_url}" alt="Post Image">` : ''}
+    </div>
+    <div class="post-footer">
+        <button class="btn upvote upvote-btn" data-id="${post._id}" ${post.upvotedBy.includes(currentUserId) ? 'disabled' : ''}>
+            <i class="fa fa-thumbs-up fa-lg ${post.upvotedBy.includes(currentUserId) ? 'upvote-active' : ''}"></i> ${post.upvotedBy.length}
+        </button>
+        <button class="btn downvote downvote-btn" data-id="${post._id}" ${post.downvotedBy.includes(currentUserId) ? 'disabled' : ''}>
+            <i class="fa fa-thumbs-down fa-lg ${post.downvotedBy.includes(currentUserId) ? 'downvote-active' : ''}"></i> ${post.downvotedBy.length}
+        </button>
+        ${post.isOwner ? `<button class="btn btn-danger delete" data-id="${post._id}">Delete</button>` : ''}
+    </div>
+    <div class="comment-section">
+        <textarea class="comment-text" placeholder="Add a comment"></textarea>
+        <button class="btn btn-primary add-comment" data-id="${post._id}">Add Comment</button>
+        <div class="comments-container">
+            ${renderComments(post.comments)}
+        </div>
+    </div>
+  `;
+
+  postsContainer.appendChild(postElement);
+
+  postElement.querySelector('.show-more')?.addEventListener('click', () => {
+    postElement.querySelector('.post-content').textContent = post.content;
+    postElement.querySelector('.show-more').style.display = 'none';
+  });
+
+  postElement.querySelector('.delete')?.addEventListener('click', handleDelete);
+  postElement.querySelector('.upvote')?.addEventListener('click', handleUpvote);
+  postElement.querySelector('.downvote')?.addEventListener('click', handleDownvote);
+  postElement.querySelector('.add-comment')?.addEventListener('click', handleAddComment);
+}
+
 
 
     // Render comments
     function renderComments(comments = []) {
-      if (comments.length === 0) return '<p class="no-comments">No comments yet.</p>';
+  if (comments.length === 0) return '<p class="no-comments">No comments yet.</p>';
 
-      return comments.map(comment => `
+  return comments
+    .map(comment => {
+      const commenter = comment.user_id || { username: 'Deleted User', profileImageUrl: 'default-profile.png' };
+
+      return `
         <div class="comment" data-id="${comment._id}">
-            <img src="${comment.user_id.profileImageUrl}" alt="Commenter">
+            <img src="${commenter.profileImageUrl}" alt="Commenter">
             <div class="comment-content">
-                <h5 class="comment-user">${comment.user_id.username}</h5>
+                <h5 class="comment-user">${commenter.username}</h5>
                 <p>${comment.content}</p>
                 <small>${new Date(comment.created_at).toLocaleString()}</small>
                 ${
-                    comment.isOwner 
-                    ? `<button class="btn btn-danger delete-comment" data-id="${comment._id}">Delete</button>` 
+                  comment.isOwner
+                    ? `<button class="btn btn-danger delete-comment" data-id="${comment._id}">Delete</button>`
                     : ''
                 }
             </div>
         </div>
-    `).join('');
-    }
+      `;
+    })
+    .join('');
+}
+
     document.addEventListener('click', event => {
       if (event.target.matches('.delete-comment')) {
         const commentId = event.target.dataset.id;
