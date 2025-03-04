@@ -1,70 +1,48 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const multer = require("multer");
-const path = require("path");
+const multer = require('multer');
+const path = require('path');
+const { 
+    handleUserSignup, 
+    handleUserLogin, 
+    handleUserEdit, 
+    verifyEmail,
+    handleUserLogout,
+    checkAuthStatus,
+    requestPasswordReset
+} = require('../controllers/authController');
+const { authMiddleware } = require('../middleware/authMiddleware');
+const checkVerificationToken = require('../middleware/checkVerificationToken');
 
-// Middleware imports
-const checkVerificationToken = require("../middleware/checkVerificationToken");
-const { authMiddleware } = require("../middleware/auth");
-
-// Controller imports
-const {
-  handleUserLogin,
-  handleUserSignup,
-  handleUserEdit,
-  verifyEmail,
-} = require("../controller/usercontroller");
-
-// Multer configuration for file uploads
+// Configure multer for profile images
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    // Use an absolute path for the uploads directory
-    cb(null, path.resolve(__dirname, "../uploads"));
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname));
-  },
-});
-
-// Multer instance
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // Limit file size to 5MB
-  fileFilter: (req, file, cb) => {
-    const allowedMimeTypes = ["image/jpeg", "image/png", "image/gif"];
-    if (allowedMimeTypes.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error("Only image files are allowed (JPEG, PNG, GIF)"));
+    destination: (req, file, cb) => cb(null, './public/uploads/'),
+    filename: (req, file, cb) => {
+        const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+        cb(null, `profile-${uniqueSuffix}${path.extname(file.originalname)}`);
     }
-  },
 });
 
-// Routes
-
-// Signup route
-router.post("/signup", upload.single("profileImageUrl"), handleUserSignup);
-
-// Login route
-router.post("/login", handleUserLogin);
-
-// Email verification route
-router.get("/verify/:token", checkVerificationToken, verifyEmail);
-
-// Edit user route (protected route)
-router.post("/edituser", authMiddleware, upload.single("image"), handleUserEdit);
-
-// Logout route
-router.get("/logout", (req, res) => {
-  // Clear the token from the cookie by setting an expired cookie
-  res.clearCookie("token", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-  });
-  return res.redirect('/login')
+const upload = multer({
+    storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (allowedTypes.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Invalid file type. Only JPEG, PNG, GIF and WebP are allowed.'));
+        }
+    }
 });
 
-// Export the router
+// Auth Routes - API focused
+router.post('/signup', upload.single('profileImage'), handleUserSignup);
+router.post('/login', handleUserLogin);
+router.post('/logout', handleUserLogout);
+router.get('/status', checkAuthStatus);
+router.get('/verify/:token', checkVerificationToken, verifyEmail);
+router.put('/user', authMiddleware, upload.single('profileImage'), handleUserEdit);
+router.post('/reset-password', requestPasswordReset);
+
 module.exports = router;
