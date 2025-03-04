@@ -7,41 +7,52 @@ const {
     deletePost,
     addComment,
     deleteComment,
-    getuserPosts,
+    getUserPosts,
     getOtherUserPosts,
     showMostUpvotedPosts,
     getPostsByType
-     // Import deleteComment function
-} = require('../controller/postController');
-const {authMiddleware} = require('../middleware/auth');
+} = require('../controllers/postController');
+const { authMiddleware } = require('../middleware/authMiddleware');
 const multer = require('multer');
 const path = require('path');
 
 const router = express.Router();
 
-// Configure multer for image uploads
+// Configure multer with memory storage for better handling in serverless environments
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, './uploads/'),
-    filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname)),
+    destination: (req, file, cb) => cb(null, './public/uploads/'),
+    filename: (req, file, cb) => {
+        const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+        cb(null, `${uniqueSuffix}${path.extname(file.originalname)}`);
+    }
 });
 
-const upload = multer({ storage });
+const upload = multer({ 
+    storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        if (allowedTypes.includes(file.mimetype)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Invalid file type. Only JPEG, PNG, GIF and WebP are allowed.'));
+        }
+    }
+});
 
-// Post Routes
-router.post('/create', authMiddleware, upload.single('image'), createPost); // Create a post
-router.get('/all', authMiddleware, getPosts); // Get all posts
-router.post('/upvote/:postId', authMiddleware, upvotePost); // Upvote a post
-router.post('/downvote/:postId', authMiddleware, downvotePost); // Downvote a post
-router.delete('/:postId', authMiddleware, deletePost); // Delete a post
-
-router.get('/userall', authMiddleware, getuserPosts); // Get all posts
-router.get('/otheruser/:_id', authMiddleware, getOtherUserPosts); // Get all posts
+// Post Routes - API focused
+router.post('/', authMiddleware, upload.single('image'), createPost);
+router.get('/', authMiddleware, getPosts);
+router.get('/user', authMiddleware, getUserPosts);
+router.get('/user/:userId', authMiddleware, getOtherUserPosts);
+router.get('/trending', authMiddleware, showMostUpvotedPosts);
+router.get('/type/:postType', authMiddleware, getPostsByType);
+router.post('/:postId/upvote', authMiddleware, upvotePost);
+router.post('/:postId/downvote', authMiddleware, downvotePost);
+router.delete('/:postId', authMiddleware, deletePost);
 
 // Comment Routes
-router.post('/:postId/comment', authMiddleware, addComment); // Add a comment
-router.delete('/comment/:commentId', authMiddleware, deleteComment); // Delete a comment
-router.get('/most-upvoted',authMiddleware, showMostUpvotedPosts);
-router.get('/:post_type', authMiddleware, getPostsByType);
+router.post('/:postId/comments', authMiddleware, addComment);
+router.delete('/comments/:commentId', authMiddleware, deleteComment);
 
 module.exports = router;
- 
