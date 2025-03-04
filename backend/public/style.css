@@ -1,0 +1,723 @@
+/* General Reset and Variables */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+:root {
+    --bg-color: #181B1E; ;
+    --text-color: #fff;
+    --sidebar-bg: #181B1E;
+    --card-bg: #2F3336;
+    --input-bg: #222;
+}
+
+[data-theme="light"] {
+    --bg-color: #F5F5F5;
+    --text-color: #000;
+    --sidebar-bg: #f9f9f9;
+    --card-bg: #FFFFFF;
+    --input-bg: #eee;
+}
+select.category-select {
+  background-color: #444;
+  color: var(--text-color);
+  border: 1px solid var(--card-bg);
+  border-radius: 5px;
+  padding: 8px 12px;
+  font-size: 16px;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+select.category-select:focus {
+  border-color: var(--text-color);
+  box-shadow: 0 0 5px var(--text-color);
+}
+
+select.category-select option {
+  background-color: var(--input-bg);
+  color: var(--text-color);
+  padding: 8px;
+}
+
+select.category-select option:hover {
+  background-color: var(--card-bg);
+}
+
+.post-category {
+  margin-top: 5px;
+  font-size: 14px;
+  color: var(--text-color);
+  align-self: center;
+  justify-content: end;
+  
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  font-size: 15px;
+  font-weight: bold;
+  border-radius: 12px;
+  color: white;
+  text-align: center;
+}
+
+.badge-Question {
+  background-color: #007BFF; /* Blue for Questions */
+}
+
+.badge-Feedback {
+  background-color: #20C997; /* Teal for Feedback */
+}
+
+.badge-Announcement {
+  background-color: #6F42C1; /* Purple for Announcements */
+}
+
+.badge-Issue {
+  background-color: #DC3545; /* Red for Issues */
+}
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.container {
+    display: grid;
+    grid-template-columns: 240px 1fr 300px;
+    min-height: 100vh;
+    margin: 0 184px;
+}
+
+/* Sidebar */
+.sidebar {
+  background-color: var(--sidebar-bg);
+  padding: 20px;
+  border-right: 1px solid #333;
+  height: 100vh;
+  border-left: 1px solid #333;
+  position: fixed;
+  box-shadow: 4px 0 6px rgba(0, 0, 0, 0.3); /* Adds a shadow to create separation */
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+
+.profile {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.profile img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 5px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.nav-item:hover {
+    background-color: var(--card-bg);
+}
+
+.nav-item i {
+    margin-right: 10px;
+    width: 20px;
+}
+
+.settings-dropdown {
+    position: relative;
+}
+
+.dropdown-toggle {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: var(--card-bg);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    overflow: hidden;
+    z-index: 1000;
+}
+
+.dropdown-menu.open {
+    display: block;
+}
+
+.dropdown-menu li {
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.dropdown-menu li:hover {
+    background-color: var(--input-bg);
+}
+
+/* Posts Section */
+button {
+  cursor: pointer;
+  outline: none;
+  color: #AAA;
+  background-color: transparent;
+  border: none;
+  transition: all 0.3s;
+}
+
+button:disabled {
+  pointer-events: none;
+  opacity: 0.6; /* Disabled button appearance */
+}
+
+.upvote-btn, .downvote-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  transition: transform 0.2s ease-in-out;
+}
+
+.upvote-btn.active .fa-thumbs-up,
+.downvote-btn.active .fa-thumbs-down {
+  color: #00ff00;
+}
+
+.upvote-active {
+  color: #00ff00;
+}
+
+.downvote-btn.active .fa-thumbs-down {
+  color: red;
+}
+
+.downvote-active {
+  color: red;
+}
+
+.btn:focus {
+  outline: none;
+}
+
+/* Pop animation on click with better visibility */
+.upvote-btn:active, .downvote-btn:active {
+  animation: pop 0.5s ease forwards;
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2); /* Increased the size for better visibility */
+  }
+  100% {
+    transform: scale(1); /* Return to original size */
+  }
+}
+  
+.posts {
+  margin-left: 17rem;
+  width: 720px;
+  opacity: 0;
+  transform: scale(0.8);
+  animation: popUp 0.5s ease forwards;
+}
+
+@keyframes popUp {
+  0% {
+      opacity: 0;
+      transform: scale(0.8);
+  }
+  100% {
+      opacity: 1;
+      transform: scale(1);
+  }
+}
+
+.post {
+  background-color: var(--card-bg);
+  padding: 20px;
+  border-radius: 12px;
+  margin: 32px auto;
+  width: 720px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.post:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+
+  
+  .post:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  .post-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Pushes the badge to the end */
+    align-items: baseline; 
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+  
+  .post-header img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+  }
+  
+  .post-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .post-profile h4 {
+    margin: 0;
+    font-size: 18px;
+    color: var(--text-color);
+  }
+  
+  .post-profile small {
+    color: #AAA;
+    font-size: 12px;
+  }
+  
+  .post-content {
+    margin: 15px 0;
+    line-height: 1.6;
+    font-size: 15px;
+    color: var(--text-color);
+  }
+  
+  .post-images {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 15px 0;
+  }
+  
+  .post-images img {
+    width: 100%;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+  
+  .post-actions {
+    display: flex;
+    gap: 25px;
+    margin-top: 15px;
+  }
+  
+  .post-action {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #AAA;
+    font-size: 14px;
+    cursor: pointer;
+    transition: color 0.3s;
+  }
+  
+  .post-action:hover {
+    color: #FFF;
+  }
+  
+  .post-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    color: #666;
+    font-size: 12px;
+  }
+  
+  /* Comment Section */
+  .comment-section {
+    margin-top: 20px;
+    background-color: var(--input-bg);
+    border-radius: 8px;
+    padding: 15px;
+  }
+  
+  .comment-text {
+    width: 100%;
+    padding: 10px;
+    background: var(--card-bg);
+    border: 1px solid #444;
+    border-radius: 6px;
+    color: #FFF;
+    resize: none;
+    font-size: 14px;
+  }
+  
+  .comments-container {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #444;
+  }
+  
+  .comment {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+  
+  .comment img {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+  }
+  
+  .comment-content h5 {
+    margin: 0;
+    font-size: 14px;
+    color: #FFF;
+  }
+  
+  .comment-content p {
+    margin: 5px 0;
+    font-size: 13px;
+    color: #DDD;
+  }
+  
+  .comment-content small {
+    color: #AAA;
+    font-size: 12px;
+  }
+  
+  .no-comments {
+    color: #AAA;
+    font-style: italic;
+    text-align: center;
+    margin-top: 10px;
+  }
+  
+  .post-time {
+    font-size: 11px;
+    text-align: right;
+    color: #AAA;
+  }
+  
+
+/* Compose Section */
+.compose-post {
+    background-color: var(--card-bg);
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 30px;
+    height: fit-content;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+  
+  
+  .compose-post:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  }
+
+/* Suggestions */
+.suggestions {
+  padding: 20px;
+  margin-left: 48rem;
+  border-left: 1px solid #222;
+  width: 30rem;
+  display: grid
+;
+  height: fit-content;
+  gap: 20px;  
+    position: fixed;
+  right: 10px;
+}
+
+.suggestion-card {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    padding: 20px;
+}
+
+.suggestion-card img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+/* Miscellaneous */
+.isAnonymous, .comment-user {
+    color: var(--text-color);
+}
+
+#content {
+    width: 100%;
+    padding: 10px;
+    background-color: var(--card-bg);
+    border: 2px solid transparent;
+    color: white;
+    border-radius: 5px;
+    resize: none;
+    font-family: Arial, sans-serif;
+}
+
+#content:focus {
+    outline: none;
+    border-color: transparent;
+}
+
+.btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: #06553afa;
+    color: #fff;
+    font-weight: bold;
+}
+
+.search-bar {
+    background-color: #000;
+    border-radius: 20px;
+    padding: 10px 20px;
+    margin-bottom: 20px;
+}
+
+.search-bar input {
+    background: none;
+    border: none;
+    color: #fff;
+    width: 100%;
+    outline: none;
+}
+button {
+    cursor: pointer;
+    outline: 0;
+    color: #AAA;
+    background-color: transparent;
+    border: none;
+    transition: all 0.3s;
+  }
+  
+  button:disabled {
+    pointer-events: all;
+    opacity: 0.6;  /* This will make the button appear disabled but still clickable in the code */
+  }
+  
+  
+  a{
+    text-decoration: none;
+    color: var(--text-color);
+    display: flex
+;
+    justify-content: center;
+    align-items: center;
+  }
+
+
+  @keyframes popIn {
+    0% {
+      transform: scale(0.8);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  
+  /* Initial state for posts */
+
+  
+  /* Add this class when a post is visible */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 21rem;
+  top: 0;
+  /* width: 100%; Full width */
+  /* height: 100%; Full height */
+  /* background-color: var(--card-bg); */
+  /* padding: 20px; */
+  /* border-radius: 12px; */
+  margin: 32px auto;
+  /* width: 100%; */
+  margin-left: 17rem;
+  /* width: 720px; */
+  opacity: 0;
+  transform: scale(0.8);
+  animation: popUp 0.5s ease forwards;
+}
+
+.hidden {
+  display: none;
+}
+.modal-content {
+  background-color: var(--input-bg);
+  padding: 20px;
+  border-radius: 50px;
+  /* margin: 32px auto; */
+  width: fit-content;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  /* transition: transform 0.3s, box-shadow 0.3s; */
+}
+
+.close-button {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close-button:hover,
+.close-button:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+button[type="submit"] {
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  height: fit-content;
+  align-self: center;
+  cursor: pointer;
+}
+.modal-interface{
+  display: flex
+;
+    align-items: center;
+    gap: 38px;
+}
+.modal-interface img {
+  width: 300px !important;
+  height: auto !important;
+  border-radius: 50%;
+  padding-top: 26px;
+}
+.modal-interface h5 {
+  text-align: center;
+  font-size: 22px;
+}
+button[type="submit"]:hover {
+  background-color: #45a049;
+}
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+input[type="text"],
+input[type="password"],
+textarea,
+input[type="file"] {
+  width: 100%;
+  padding: 8px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+input[type="text"]:invalid,
+input[type="password"]:invalid,
+textarea:invalid {
+  border-color: red;
+}
+
+.invalid-feedback {
+  color: red;
+  font-size: 12px;
+  display: none;
+}
+
+input[type="text"]:invalid + .invalid-feedback,
+input[type="password"]:invalid + .invalid-feedback,
+textarea:invalid + .invalid-feedback {
+  display: block;
+}
+
+/* button {
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+} */
+
+textarea {
+  min-height: 100px;
+}
+
+#show-password-btn {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+}
+
+#password-icon {
+  font-size: 18px;
+}
+
+
+/* #imagePreviewContainer {
+  width: 300px;              
+  height: 300px;          
+  overflow: hidden;        
+  position: relative;
+  border-radius: 15px;      
+  border: 2px solid #ccc;   
+}  */
+
+.preview-img {
+  object-fit: contain;       /* Ensures the image fits within the container while maintaining aspect ratio */
+  width: 100%;               /* Makes the image responsive */
+  height: 100%;              /* Ensures the image respects the container's height */
+  max-width: 100%;           /* Prevents the image from exceeding the container's width */
+  max-height: 100%;          /* Prevents the image from exceeding the container's height */
+  border-radius: 15px;       /* Adds rounded corners to the image */
+}
